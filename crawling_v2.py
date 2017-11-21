@@ -28,7 +28,7 @@ FetchStatistic = namedtuple('FetchStatistic',
 class Crawler:
     def __init__(self, roots,
                  max_cur_depth=5, max_tries=4,  # Per-url limits.
-                 max_tasks=10, *, loop=None):
+                 max_tasks=20, *, loop=None):
         self.loop = loop or asyncio.get_event_loop()
         self.roots = roots
         self.max_cur_depth = max_cur_depth
@@ -41,7 +41,7 @@ class Crawler:
             'Accept-Language': 'en-US,en;q=0.8,zh-Hans-CN;q=0.5,zh-Hans;q=0.3',
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; rv:11.0) like Gecko'
         }
-        self.session = aiohttp.ClientSession(loop=self.loop, headers=self.headers)
+        self.session = aiohttp.ClientSession(headers=self.headers)
         self.seen_urls = set()
         self.done = []
         self.root_domains = 'dianrong.com'
@@ -58,16 +58,14 @@ class Crawler:
     def record_statistic(self, fetch_statistic):
         # c = motor.MotorClient('/tmp/mongodb-5281.sock', max_pool_size=1000)
         # db = c.test_database
-        self.i+=1
-        print(self.i)
-        pass
-        # self.db.sitemap.insert({
-        #     'url': fetch_statistic.url,
-        #     'sub_urls': list(fetch_statistic.sub_urls),
-        #     'status': fetch_statistic.status,
-        #     'title': fetch_statistic.title,
-        #     'cur_depth': fetch_statistic.cur_depth,
-        # })
+
+        self.db.sitemap.save({
+            'url': fetch_statistic.url,
+            'sub_urls': list(fetch_statistic.sub_urls),
+            'status': fetch_statistic.status,
+            'title': fetch_statistic.title,
+            'cur_depth': fetch_statistic.cur_depth,
+        })
 
     async def parse_links(self, response, cur_depth):
         links = set()
@@ -88,7 +86,7 @@ class Crawler:
                 title = doc.xpath('//head/title/text()')
                 if title:
                     real_title = title[0]
-                sub_nodes = doc.xpath('//*[@href] | //*[@data-href] | //*[@data-url]')
+                sub_nodes = doc.xpath('//*[@href]')
                 for sub_node in sub_nodes:
                     sub_url = sub_node.xpath('./@href')
                     if sub_url:
@@ -185,7 +183,6 @@ if __name__ == '__main__':
     crawler = Crawler(roots)
     try:
         loop.run_until_complete(crawler.crawl())
-        print(crawler.i)
     finally:
         crawler.close()
 
