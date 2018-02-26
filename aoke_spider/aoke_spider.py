@@ -26,20 +26,20 @@ yapan_to_shuzi = {
     "三球": 3,
     "三/三球半": 3.25,
     "三球半": 3.5,
-    "受平/半": -0.25,
-    "受半球": -0.5,
-    "受半/一": -0.75,
-    "受一球": -1,
-    "受一/球半": -1.25,
-    "受球半": -1.5,
-    "受球半/两": -1.75,
-    "受两球": -2,
-    "受两/两球半": -2.25,
-    "受两球半": -2.5,
-    "受两球半/三": -2.75,
-    "受三球": -3,
-    "受三/三球半": -3.25,
-    "受三球半": -3.5
+    "*平/半": -0.25,
+    "*半球": -0.5,
+    "*半/一": -0.75,
+    "*一球": -1,
+    "*一/球半": -1.25,
+    "*球半": -1.5,
+    "*球半/两": -1.75,
+    "*两球": -2,
+    "*两/两球半": -2.25,
+    "*两球半": -2.5,
+    "*两球半/三": -2.75,
+    "*三球": -3,
+    "*三/三球半": -3.25,
+    "*三球半": -3.5
 }
 
 xingqi_to_shuzi = {
@@ -124,25 +124,22 @@ def get_jingcai_info():
 
 
 def get_qiutan_info(date):
-    params = {
-        "date": date
-    }
-    url = 'http://a.haocai138.com/info/match/Jingcai.aspx'
+    url = 'http://www.365rich.com/KJ/'+date
     headers = {
         'User-Agent': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; WOW64; Trident/5.0; SLCC2; .NET CLR 2.0.50727; '
                       '.NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; .NET4.0C; .NET4.0E) '
     }
-    response = requests.get(url, params=params, headers=headers)
+    response = requests.get(url, headers=headers)
     content = etree.HTML(response.content)
-    bisai_infos = content.xpath('//tr[@gamename]')
+    bisai_infos = content.xpath('//tr[contains(@id, "tr_")]')
     bisai_info_list = []
     for bisai_info in bisai_infos:
         xuhao = filter(lambda ch: ch in '0123456789-', bisai_info.xpath('td[1]/text()')[0])
-        before_xuhao = str(xingqi_to_shuzi[
-                               filter(lambda ch: ch not in '0123456789-', bisai_info.xpath('td[1]/text()')[0]).encode(
+        before_xuhao = str(xingqi_to_shuzi[bisai_info.xpath('@name')[0].encode(
                                    "utf8")]) + xuhao
-        url = bisai_info.xpath('td[last()-1]/a[last()]/@href')[0].split('/')[-1]
-        full_url = 'http://a.haocai138.com/analysis/odds/' + url + '?' + str(int(time.time())) + '000'
+        url = bisai_info.xpath('td[@align="center"]/a[1]/@onclick')[0]
+        match_info = filter(lambda ch: ch in '0123456789', url.encode("utf-8"))
+        full_url = 'http://www.365rich.com/analysis/odds/' + match_info + '.htm'+'?'+str(int(time.time())) + '000'
         response = requests.get(full_url, headers=headers)
         pattern = 'Crown;(.*?);Bet365'
         content = re.findall(pattern, response.content)
@@ -151,8 +148,8 @@ def get_qiutan_info(date):
         jishi = yapan[1].split(',')
         chupan_ya = chupan[8]
         chupan_daxiao = chupan[12]
-        chupan_daxiao_da = chupan_daxiao[11]
-        chupan_daxiao_xiao = chupan_daxiao_xiao[13]
+        chupan_daxiao_da = chupan[11]
+        chupan_daxiao_xiao = chupan[13]
         jishi_ya = jishi[8]
         jishi_ya = jishi_ya if jishi_ya != chupan_ya else None
         jishi_daxiao = jishi[12]
@@ -277,4 +274,4 @@ def change_daxiao(num):
     return sum_num / len(num_list)
 
 if __name__ == '__main__':
-    get_jingcai_info()
+    get_qiutan_info("2018-02-25")

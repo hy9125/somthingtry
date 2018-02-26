@@ -38,6 +38,8 @@ def Yesterday():
                     rangqiu_peilv = float(caiguo_info['jishi_ya_rang']) * 100
                 else:
                     rangqiu_peilv = u'走'
+                if '(' not in zhudui:
+                    rangqiu_ya = -rangqiu_ya
                 # daxiao_ya = change_daxiao(caiguo_info['jishi_daxiao']) if caiguo_info[
                 #     'jishi_daxiao'] else change_daxiao(caiguo_info['chupan_daxiao'])
                 daxiao_ya = change_daxiao(caiguo_info['chupan_daxiao'])
@@ -50,10 +52,10 @@ def Yesterday():
                 else:
                     daxiao_peilv = u'走'
                     daxiao_jieguo = u'走'
-            ws.write(i, 10, rangqiu_ya)
+            ws.write(i, 10, str(rangqiu_ya))
             ws.write(i, 11, daxiao_jieguo)
             ws.write(i, 12, rangqiu_peilv)
-            ws.write(i, 15, daxiao_ya)
+            ws.write(i, 15, str(daxiao_ya))
             ws.write(i, 16, daxiao_peilv)
             ws.write(i, 6, bifen)
             ws.write(i, 17, caiguo_info['peilv'])
