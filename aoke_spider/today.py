@@ -31,7 +31,7 @@ def today():
     sheet.write(0, 21, u'半全场')
     sheet.write(0, 22, u'半全场')
     touzhu_list = get_jingcai_info()
-    date = datetime.datetime.now().strftime("%Y-%m-25")
+    date = datetime.datetime.now().strftime("%Y-%m-%d")
     final_list = []
     yapan_list = get_qiutan_info(date)
     for yapan in yapan_list:
